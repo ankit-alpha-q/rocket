@@ -10,6 +10,13 @@ const canvas = document.querySelector(".webgl");
 var hasCrashed = false;
 var startGame = false;
 var stopSmoke = false;
+var currentScore = 0;
+const highScore = $(".word");
+
+//getScore
+var score = window.localStorage.getItem("rocket_3d_score");
+const box = $(".value");
+box[0].innerHTML = score || 0;
 
 //launch game
 const launch = $(".launch");
@@ -18,21 +25,23 @@ const title = $(".title-box");
 
 launch.click(() => {
   stopSmoke = true;
+  highScore[0].innerHTML = "Score : ";
+  box[0].innerHTML = 0;
   title[0].style.top = "-70%";
-  gsap.to(galaxyMesh.rotation,{
-    duration:2,
-    x:1,
-    ease: 'power3.out'
-  })
-  gsap.to(level.mesh.position,{
-      duration: 2,
-      y:0
-  })
-  gsap.to(level.mesh.rotation,{
-      duration: 1,
-      x:0,
-      ease:'Power3.out'
-  })
+  gsap.to(galaxyMesh.rotation, {
+    duration: 2,
+    x: 0.8,
+    ease: "power3.out",
+  });
+  gsap.to(level.mesh.position, {
+    duration: 2,
+    y: 0,
+  });
+  gsap.to(level.mesh.rotation, {
+    duration: 1,
+    x: 0,
+    ease: "Power3.out",
+  });
   gsap.to(rocket.mesh.scale, {
     duration: 1,
     x: 0.002,
@@ -43,7 +52,7 @@ launch.click(() => {
   gsap.to(rocket.mesh.position, {
     duration: 1,
     x: 0,
-    y: 0,
+    y: -2,
     z: 0,
     ease: "Power3.inOut",
   });
@@ -61,24 +70,26 @@ launch.click(() => {
 
 back.click(() => {
   stopSmoke = true;
+  highScore[0].innerHTML = "High Score : ";
+  box[0].innerHTML = score || 0;
   back[0].style.left = "-50px";
   title[0].style.top = "0%";
   assembleParts();
-  gsap.to(galaxyMesh.rotation,{
-    duration:2,
-    x:0,
-    ease: 'power3.out'
-  })
-  gsap.to(level.mesh.position,{
-      duration: 2,
-      y:-40,
-      z:-40,
-  })
-  gsap.to(level.mesh.rotation,{
-      duration: 2,
-      x:-1.5,
-      ease:'Power3.in'
-  })
+  gsap.to(galaxyMesh.rotation, {
+    duration: 2,
+    x: 0,
+    ease: "power3.out",
+  });
+  gsap.to(level.mesh.position, {
+    duration: 2,
+    y: -40,
+    z: -40,
+  });
+  gsap.to(level.mesh.rotation, {
+    duration: 2,
+    x: -1.5,
+    ease: "Power3.in",
+  });
   gsap.to(rocket.mesh.scale, {
     duration: 1,
     x: 0.01,
@@ -109,7 +120,7 @@ back.click(() => {
     onComplete: () => {
       startGame = false;
       stopSmoke = false;
-      hasCrashed=false;
+      hasCrashed = false;
     },
   });
 });
@@ -156,18 +167,17 @@ scene.add(ambientlight);
 
 //point light
 const pointLight = new THREE.PointLight(0xffffff, 1);
-//  pointLight.castShadow = true;
 pointLight.position.set(0, 5, 10);
 scene.add(pointLight);
 
 //galaxy
-const starGeo = new THREE.SphereGeometry(500,64,64);
+const starGeo = new THREE.SphereGeometry(500, 64, 64);
 const starMat = new THREE.MeshBasicMaterial({
   map: THREE.ImageUtils.loadTexture("./galaxy1.png"),
   side: THREE.BackSide,
   transparent: true,
-})
-const galaxyMesh = new THREE.Mesh(starGeo,starMat);
+});
+const galaxyMesh = new THREE.Mesh(starGeo, starMat);
 scene.add(galaxyMesh);
 
 //rocket body
@@ -184,32 +194,30 @@ level.mesh.position.y = -40;
 level.mesh.rotation.x = -1.5;
 scene.add(level.mesh);
 
-const assembleParts = () =>{
-    transitionArray.forEach((i) => {
-      i.reverse();
-    });
-    transitionArray = [];
-}
+const assembleParts = () => {
+  transitionArray.forEach((i) => {
+    i.reverse();
+  });
+  transitionArray = [];
+};
 
 const control = {
   up: false,
   down: false,
   left: false,
   right: false,
-  forward: false,
-  backward: false,
 };
 
 window.addEventListener("keydown", (e) => {
   if (startGame) {
     //Reset game - r
-    if (e.keyCode == 82) {
+    if (e.keyCode == 82 && hasCrashed) {
       back[0].style.left = "-50px";
       assembleParts();
       gsap.to(rocket.mesh.position, {
         duration: 1,
         x: 0,
-        y: 0,
+        y: -2,
         z: 0,
       });
       gsap.to(camera.position, {
@@ -218,6 +226,12 @@ window.addEventListener("keydown", (e) => {
         y: 0,
         z: 8,
       });
+      gsap.to(rocket.mesh.rotation, {
+        duration: 1,
+        x: -1.5,
+        y: 1.5,
+        z: 0,
+      });
       gsap.to(level.mesh.position, {
         duration: 1,
         z: -40,
@@ -225,14 +239,6 @@ window.addEventListener("keydown", (e) => {
           hasCrashed = false;
         },
       });
-      rocket.mesh.rotation.x = -1.5;
-      rocket.mesh.rotation.y = 1.5;
-    }
-    if (e.keyCode == 87) {
-      control.forward = true;
-    }
-    if (e.keyCode == 83) {
-      control.backward = true;
     }
     if (e.keyCode == 37) {
       control.down = true;
@@ -276,20 +282,14 @@ window.addEventListener("keydown", (e) => {
         });
       }
     }
-    if(e.keyCode == 13 || e.keyCode == 32){
-        e.preventDefault();
+    if (e.keyCode == 13 || e.keyCode == 32) {
+      e.preventDefault();
     }
   }
 });
 
 window.addEventListener("keyup", (e) => {
   if (startGame) {
-    if (e.keyCode == 87) {
-      control.forward = false;
-    }
-    if (e.keyCode == 83) {
-      control.backward = false;
-    }
     if (e.keyCode == 37) {
       control.down = false;
       if (!hasCrashed) {
@@ -383,7 +383,7 @@ const dropParticle = (p) => {
     p.mesh.position.z = 0;
   }
   gsap.to(p.mesh.scale, {
-    duration: 1,
+    duration: startGame ? 0.5 : 1,
     x: startGame ? s * 0.008 : s * 0.03,
     y: startGame ? s * 0.008 : s * 0.03,
     z: startGame ? s * 0.008 : s * 0.03,
@@ -395,8 +395,8 @@ const dropParticle = (p) => {
     p.mesh.position,
     startGame
       ? {
-          duration: 1,
-          z: 2,
+          duration: 0.5,
+          z: 1,
           y: rocket.mesh.position.y - 0.5,
           ease: "none",
         }
@@ -407,7 +407,7 @@ const dropParticle = (p) => {
         }
   );
   gsap.to(p.mesh.material, {
-    duration: 1,
+    duration: startGame ? 0.5 : 1,
     opacity: 0,
     ease: "none",
   });
@@ -422,12 +422,6 @@ const recycleParticle = (p) => {
 
 const updateRocketPosition = () => {
   if (!hasCrashed) {
-    if (control.forward) {
-      level.mesh.position.z += 0.5;
-    }
-    if (control.backward) {
-      level.mesh.position.z -= 0.5;
-    }
     if (control.up) {
       rocket.mesh.position.x += 0.2;
       camera.position.x += 0.2;
@@ -474,14 +468,21 @@ const checkCollision = () => {
             rocket.mesh.position.x <= level.arr[i] - 6.75)
         ) {
           hasCrashed = true;
+          if (currentScore > score) {
+            score = currentScore;
+            window.localStorage.setItem(
+              "rocket_3d_score",
+              currentScore
+            );
+          }
           back[0].style.left = "0px";
           rocket.roof.children.forEach((i) => {
             transitionArray.push(
               gsap.to(i.position, {
                 duration: 1,
-                x: i.position.x + Math.floor(Math.random() * 400 + 1),
-                y: i.position.y - Math.floor(Math.random() * 400 + 1),
-                z: i.position.z + Math.floor(Math.random() * 400 + 1),
+                x: i.position.x + Math.floor(Math.random() * 500 + 1),
+                y: i.position.y - Math.floor(Math.random() * 500 + 1),
+                z: i.position.z + Math.floor(Math.random() * 500 + 1),
               })
             );
           });
@@ -489,9 +490,9 @@ const checkCollision = () => {
             transitionArray.push(
               gsap.to(i.position, {
                 duration: 1,
-                x: i.position.x - Math.floor(Math.random() * 400 + 1),
-                y: i.position.y - Math.floor(Math.random() * 400 + 1),
-                z: i.position.z - Math.floor(Math.random() * 400 + 1),
+                x: i.position.x - Math.floor(Math.random() * 500 + 1),
+                y: i.position.y - Math.floor(Math.random() * 500 + 1),
+                z: i.position.z - Math.floor(Math.random() * 500 + 1),
               })
             );
           });
@@ -499,9 +500,9 @@ const checkCollision = () => {
             transitionArray.push(
               gsap.to(i.position, {
                 duration: 1,
-                x: i.position.x + Math.floor(Math.random() * 400 + 1),
-                y: i.position.y - Math.floor(Math.random() * 400 + 1),
-                z: i.position.z + Math.floor(Math.random() * 400 + 1),
+                x: i.position.x + Math.floor(Math.random() * 500 + 1),
+                y: i.position.y - Math.floor(Math.random() * 500 + 1),
+                z: i.position.z + Math.floor(Math.random() * 500 + 1),
               })
             );
           });
@@ -509,9 +510,9 @@ const checkCollision = () => {
             transitionArray.push(
               gsap.to(i.position, {
                 duration: 1,
-                x: i.position.x - Math.floor(Math.random() * 400 + 1),
-                y: i.position.y - Math.floor(Math.random() * 400 + 1),
-                z: i.position.z - Math.floor(Math.random() * 400 + 1),
+                x: i.position.x - Math.floor(Math.random() * 500 + 1),
+                y: i.position.y - Math.floor(Math.random() * 500 + 1),
+                z: i.position.z - Math.floor(Math.random() * 500 + 1),
               })
             );
           });
@@ -521,12 +522,23 @@ const checkCollision = () => {
   }
 };
 
+const updateScore = () => {
+  currentScore = Math.floor((level.mesh.position.z + 40)/40);
+  box[0].innerHTML = currentScore;
+};
+
 const animate = () => {
   if (!startGame) {
     rocket.mesh.rotation.y += 0.01;
+  } else {
+    if (!hasCrashed) {
+      level.mesh.position.z += 0.5;
+    }
   }
+  galaxyMesh.rotation.y += 0.0001;
   createSmoke();
-  checkCollision();
+  !stopSmoke && startGame && checkCollision();
+  !stopSmoke && startGame && updateScore();
   updateRocketPosition();
   requestAnimationFrame(animate);
   renderer.render(scene, camera);

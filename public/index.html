@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="./style.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
+
 <body>
     <div class="backBtn"> <i class="material-icons">arrow_back</i></div>
     <div class="title-box">
@@ -18,6 +20,20 @@
     </div>
     <div>
         <canvas class="webgl"></canvas>
+    </div>
+    <div class="score">
+        <span class="word">High Score : </span>
+        <span class="value">0</span>
+    </div>
+    <div class="footer">
+        <img class="info" src="./info.ico">
+        <div class="info-box">
+            <div>← ↑ → ↓ - control</div>
+            <div> r - replay</div>
+        </div>
+        <a target="_blank" href="https://github.com/ankit-alpha-q/rocket">
+            <img class="git" src="./git.png">
+        </a>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
     <script type='module' src="./index.js"></script>
