@@ -12,6 +12,14 @@ var startGame = false;
 var stopSmoke = false;
 var currentScore = 0;
 const highScore = $(".word");
+const message = $(".complete");
+const restart = $(".back");
+var completed = false;
+
+restart.click(()=>{
+  message[0].style.top="-100%"
+  goBack();
+})
 
 //getScore
 var score = window.localStorage.getItem("rocket_3d_score");
@@ -27,7 +35,7 @@ launch.click(() => {
   stopSmoke = true;
   highScore[0].innerHTML = "Score : ";
   box[0].innerHTML = 0;
-  title[0].style.top = "-70%";
+  title[0].style.top = "-100%";
   gsap.to(galaxyMesh.rotation, {
     duration: 2,
     x: 0.8,
@@ -68,8 +76,9 @@ launch.click(() => {
   });
 });
 
-back.click(() => {
+const goBack = () => {
   stopSmoke = true;
+  level.arrangeObstacle();
   highScore[0].innerHTML = "High Score : ";
   box[0].innerHTML = score || 0;
   back[0].style.left = "-50px";
@@ -121,9 +130,12 @@ back.click(() => {
       startGame = false;
       stopSmoke = false;
       hasCrashed = false;
+      completed = false;
     },
   });
-});
+}
+
+back.click(goBack);
 
 // scene setup
 scene = new THREE.Scene();
@@ -212,6 +224,7 @@ window.addEventListener("keydown", (e) => {
   if (startGame) {
     //Reset game - r
     if (e.keyCode == 82 && hasCrashed) {
+      level.arrangeObstacle();
       back[0].style.left = "-50px";
       assembleParts();
       gsap.to(rocket.mesh.position, {
@@ -464,8 +477,8 @@ const checkCollision = () => {
         if (
           (rocket.mesh.position.x >= level.arr[i] - 3.25 &&
             rocket.mesh.position.x <= level.arr[i] + 2.75) ||
-          (rocket.mesh.position.x >= level.arr[i] - 13.25 &&
-            rocket.mesh.position.x <= level.arr[i] - 6.75)
+          (rocket.mesh.position.x >= level.arr[i] - (level.arr1[i] + 3.25) &&
+            rocket.mesh.position.x <= level.arr[i] - (level.arr1[i] - 3.25))
         ) {
           hasCrashed = true;
           if (currentScore > score) {
@@ -528,17 +541,28 @@ const updateScore = () => {
 };
 
 const animate = () => {
+  if(level.mesh.position.z == level.arr.length * 40 && !completed){
+    message[0].style.top="10%"
+    completed = true
+    if (currentScore > score) {
+      score = currentScore;
+      window.localStorage.setItem(
+        "rocket_3d_score",
+        currentScore
+      );
+    }
+  }
   if (!startGame) {
     rocket.mesh.rotation.y += 0.01;
   } else {
-    if (!hasCrashed) {
+    if (!hasCrashed && !completed) {
       level.mesh.position.z += 0.5;
     }
   }
   galaxyMesh.rotation.y += 0.0001;
   createSmoke();
-  !stopSmoke && startGame && checkCollision();
-  !stopSmoke && startGame && updateScore();
+  !stopSmoke && startGame && !completed && checkCollision();
+  !stopSmoke && startGame && !completed && updateScore();
   updateRocketPosition();
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
