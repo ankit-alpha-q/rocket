@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start":"node server.js"
+    "start": "node server.js",
+    "build": "webpack --mode=none"
   },
   "keywords": [],
   "author": "",
@@ -12,6 +13,10 @@
   "dependencies": {
     "express": "^4.17.1",
     "gsap": "^3.7.0",
-    "three": "^0.129.0"
+    "three": "^0.129.0",
+    "webpack": "^5.41.1"
+  },
+  "devDependencies": {
+    "webpack-cli": "^4.7.2"
   }
 }
