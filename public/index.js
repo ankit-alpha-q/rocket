@@ -16,10 +16,10 @@ const message = $(".complete");
 const restart = $(".back");
 var completed = false;
 
-restart.click(()=>{
-  message[0].style.top="-100%"
+restart.click(() => {
+  message[0].style.top = "-100%";
   goBack();
-})
+});
 
 //getScore
 var score = window.localStorage.getItem("rocket_3d_score");
@@ -133,7 +133,7 @@ const goBack = () => {
       completed = false;
     },
   });
-}
+};
 
 back.click(goBack);
 
@@ -483,10 +483,7 @@ const checkCollision = () => {
           hasCrashed = true;
           if (currentScore > score) {
             score = currentScore;
-            window.localStorage.setItem(
-              "rocket_3d_score",
-              currentScore
-            );
+            window.localStorage.setItem("rocket_3d_score", currentScore);
           }
           back[0].style.left = "0px";
           rocket.roof.children.forEach((i) => {
@@ -536,27 +533,24 @@ const checkCollision = () => {
 };
 
 const updateScore = () => {
-  currentScore = Math.floor((level.mesh.position.z + 40)/40);
+  currentScore = Math.floor((level.mesh.position.z + 40) / 40);
   box[0].innerHTML = currentScore;
 };
 
 const animate = () => {
-  if(level.mesh.position.z == level.arr.length * 40 && !completed){
-    message[0].style.top="10%"
-    completed = true
+  if (level.mesh.position.z == level.arr.length * 40 && !completed) {
+    message[0].style.top = "10%";
+    completed = true;
     if (currentScore > score) {
       score = currentScore;
-      window.localStorage.setItem(
-        "rocket_3d_score",
-        currentScore
-      );
+      window.localStorage.setItem("rocket_3d_score", currentScore);
     }
   }
   if (!startGame) {
     rocket.mesh.rotation.y += 0.01;
   } else {
     if (!hasCrashed && !completed) {
-      level.mesh.position.z += 0.5;
+      level.mesh.position.z += 0.5 + currentScore / 1000;
     }
   }
   galaxyMesh.rotation.y += 0.0001;
